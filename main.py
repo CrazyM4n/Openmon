@@ -11,6 +11,12 @@ walkAnimationIndexMax = 80
 c = pygame.display.set_mode((800, 600))
 charPos = [0, 0] #x, y
 
+#fonts
+pokeFont = pygame.font.Font("fonts/PokemonGB.ttf", 64)#http://www.fontspace.com/jackster-productions/pokemon-gb
+pokeFontU = pygame.font.Font("fonts/PokemonGBU.ttf", 64)
+pokeFontU.set_underline(True)
+mono = pygame.font.SysFont("monospace", 32)
+
 #controls
 interact = pygame.K_x
 
@@ -20,9 +26,7 @@ male = False
 
 #begin to define stuff needed for the game
 def bottomMessage(text):
-	mono = pygame.font.SysFont("monospace", 32)
 	downArrow = mono.render("↓ [Press X]", 1, (0, 0, 0)) #↓
-	pokeFont = pygame.font.Font("fonts/PokemonGB.ttf", 64)#http://www.fontspace.com/jackster-productions/pokemon-gb
 	box = pygame.image.load("img/box.png")
 	boxRect = box.get_rect()
 	boxRect.y = 400
@@ -65,7 +69,6 @@ def bottomMessageNoScroll(text):
 	boxRect = box.get_rect()
 	boxRect.y = 400
 	c.blit(box, boxRect)
-	pokeFont = pygame.font.Font("fonts/PokemonGB.ttf", 64)
 	textToRender = pokeFont.render(text, 1, (0, 0, 0))
 	c.blit(textToRender, (20, 430))
 	pygame.display.flip()
@@ -73,34 +76,75 @@ def bottomMessageNoScroll(text):
 def intro():
 	#say some stuff
 	bottomMessage(intros.introString[0])
-	#ask for name
-	bottomMessageNoScroll("_")
-	global name
-	enter = False #is true when the person presses enter
-	while enter == False:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT: sys.exit()
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
-					enter = True
 
-				elif event.key == pygame.K_BACKSPACE:
-					try:
-						name = name[:len(name)-1]
-						bottomMessageNoScroll(name+"_")
-					except: 
-						name = ""
-						bottomMessageNoScroll(name+"_")
+	def askForName():
+		bottomMessage(intros.introString[1])
+		bottomMessageNoScroll("_")
+		global name
+		enter = False #is true when the person presses enter/continues with x
+		while enter == False:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT: sys.exit()
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
+						enter = True
 
-				else:
-					if event.key in parse_key_codes.aToZ:
-						name = name + parse_key_codes.parse(event.key) + ""
-						bottomMessageNoScroll(name+"_")
+					elif event.key == pygame.K_BACKSPACE:
+						try:
+							name = name[:len(name)-1]
+							bottomMessageNoScroll(name+"_")
+						except: 
+							name = ""
+							bottomMessageNoScroll(name+"_")
 
-	#lets get back to the intro...
-	bottomMessage(intros.introString[1]+name+intros.introString[2]+"")
+					else:
+						if event.key in parse_key_codes.aToZ:
+							name = name + parse_key_codes.parse(event.key) + ""
+							bottomMessageNoScroll(name+"_")
+
+		#lets get back to the intro...
+		bottomMessage(intros.introString[2]+name+intros.introString[3]+"")
+
+		#ask if name is correct
+		yesSelected = True #which option is selected
+		enter = False #when they press x
+		box = pygame.image.load("img/box.png") #making a box above the other box
+		boxRect = box.get_rect()
+		boxRect.y = 200
+		#making the options
+		yesUnderlined = pokeFontU.render("Yes", 1, (0, 0, 0))
+		no = pokeFont.render("No", 1, (0, 0, 0))
+		yes = pokeFont.render("Yes", 1, (0, 0, 0))
+		noUnderlined = pokeFontU.render("No", 1, (0, 0, 0))
+		noRect = no.get_rect()
+		noRect.x = 600
+		noRect.y = 250
+		yesRect = yes.get_rect()
+		yesRect.x = 200
+		yesRect.y = 250
+		while enter == False:
+			if yesSelected:
+				c.blit(box, boxRect)
+				c.blit(yesUnderlined, yesRect)
+				c.blit(no, noRect)
+				pygame.display.flip()
+			elif yesSelected == False:
+				c.blit(box, boxRect)
+				c.blit(yes, yesRect)
+				c.blit(noUnderlined, noRect)
+				pygame.display.flip()
+			for event in pygame.event.get():
+					if event.type == pygame.QUIT: sys.exit()
+					if event.type == pygame.KEYDOWN:
+						if event.key == pygame.K_x:
+							if yesSelected: enter = True; c.fill((0, 0, 0))
+							elif yesSelected == False: askForName(); c.fill((0, 0, 0))
+
+						elif event.key == pygame.K_LEFT or pygame.K_RIGHT:
+							yesSelected = not yesSelected
+
+	askForName()
 				
-
 #game loop, states of the game
 inGame = True
 inIntro = True
