@@ -1,4 +1,4 @@
-import sys, pygame, char, intros
+import sys, pygame, char, intros, parse_key_codes
 
 pygame.init()
 clock = pygame.time.Clock() #keeps fps steady
@@ -13,6 +13,10 @@ charPos = [0, 0] #x, y
 
 #controls
 interact = pygame.K_x
+
+#player constants
+name = ""
+male = False
 
 #begin to define stuff needed for the game
 def bottomMessage(text):
@@ -47,6 +51,8 @@ def bottomMessage(text):
 							c.blit(box, boxRect)
 							next = True
 	next = False 
+	c.blit(downArrow, (550, 550))
+	pygame.display.flip()
 	while next == False:
 				for event in pygame.event.get():
 					if event.type == pygame.QUIT: sys.exit()
@@ -54,13 +60,50 @@ def bottomMessage(text):
 						if event.key == interact:
 							next = True
 
+def bottomMessageNoScroll(text):
+	box = pygame.image.load("img/box.png")
+	boxRect = box.get_rect()
+	boxRect.y = 400
+	c.blit(box, boxRect)
+	pokeFont = pygame.font.Font("fonts/PokemonGB.ttf", 64)
+	textToRender = pokeFont.render(text, 1, (0, 0, 0))
+	c.blit(textToRender, (20, 430))
+	pygame.display.flip()
 
 def intro():
+	#say some stuff
 	bottomMessage(intros.introString[0])
+	#ask for name
+	bottomMessageNoScroll("_")
+	global name
+	enter = False #is true when the person presses enter
+	while enter == False:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT: sys.exit()
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
+					enter = True
 
-#game loop
-inGame = True #states of the game
-inIntro = False
+				elif event.key == pygame.K_BACKSPACE:
+					try:
+						name = name[:len(name)-1]
+						bottomMessageNoScroll(name+"_")
+					except: 
+						name = ""
+						bottomMessageNoScroll(name+"_")
+
+				else:
+					if event.key in parse_key_codes.aToZ:
+						name = name + parse_key_codes.parse(event.key) + ""
+						bottomMessageNoScroll(name+"_")
+
+	#lets get back to the intro...
+	bottomMessage(intros.introString[1]+name+intros.introString[2]+"")
+				
+
+#game loop, states of the game
+inGame = True
+inIntro = True
 showChar = True
 canMove = True
 
@@ -70,7 +113,6 @@ up = False
 down = False
 left = False
 right = False
-male = True
 
 if male == True:
 	charUp = char.maleCharUp
@@ -169,11 +211,11 @@ while inGame:
 		if walking == False and showChar == True:
 			if up:
 				c.blit(charUp[0], char.charRect)
-			if down:
+			elif down:
 				c.blit(charDown[0], char.charRect)
-			if left:
+			elif left:
 				c.blit(charLeft[0], char.charRect)
-			if right:
+			elif right:
 				c.blit(charRight[0], char.charRect)
 
 		if walkAnimationIndex >= walkAnimationIndexMax:
