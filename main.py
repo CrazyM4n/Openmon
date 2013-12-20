@@ -22,9 +22,13 @@ interact = pygame.K_x
 
 #player constants
 name = ""
-male = False
+male = True
 
 #begin to define stuff needed for the game
+def boyOrGirl():
+	if male: return "boy"
+	if male == False: return "girl"
+
 def bottomMessage(text):
 	downArrow = mono.render("↓ [Press X]", 1, (0, 0, 0)) #↓
 	box = pygame.image.load("img/box.png")
@@ -144,6 +148,55 @@ def intro():
 							yesSelected = not yesSelected
 
 	askForName()
+
+	def askForGender():
+		#literally copied and pasted askForName()
+		bottomMessage(intros.introString[4])
+		global male
+		boySelected = True #which option is selected
+		enter = False #when they press x
+		box = pygame.image.load("img/box.png") #making a box above the other box
+		boxRect = box.get_rect()
+		boxRect.y = 200
+		#making the options
+		boyUnderlined = pokeFontU.render("Boy", 1, (0, 0, 0))
+		girl = pokeFont.render("Girl", 1, (0, 0, 0))
+		boy = pokeFont.render("Boy", 1, (0, 0, 0))
+		girlUnderlined = pokeFontU.render("Girl", 1, (0, 0, 0))
+		girlRect = girl.get_rect()
+		girlRect.x = 600
+		girlRect.y = 250
+		boyRect = boy.get_rect()
+		boyRect.x = 200
+		boyRect.y = 250
+		while enter == False:
+			if boySelected:
+				c.blit(box, boxRect)
+				c.blit(boyUnderlined, boyRect)
+				c.blit(girl, girlRect)
+				pygame.display.flip()
+			elif boySelected == False:
+				c.blit(box, boxRect)
+				c.blit(boy, boyRect)
+				c.blit(girlUnderlined, girlRect)
+				pygame.display.flip()
+			for event in pygame.event.get():
+					if event.type == pygame.QUIT: sys.exit()
+					if event.type == pygame.KEYDOWN:
+						if event.key == pygame.K_x:
+							if boySelected: enter = True; male = True; c.fill((0, 0, 0))
+							elif boySelected == False: enter = True; male = False; c.fill((0, 0, 0))
+
+						elif event.key == pygame.K_LEFT or pygame.K_RIGHT:
+							boySelected = not boySelected
+
+	askForGender()
+
+	#finally done asking stuff ;_;
+	bottomMessage(intros.introString[5]+boyOrGirl()+intros.introString[6]+name+intros.introString[7]+"")
+	bottomMessage(intros.introString[8])
+
+
 				
 #game loop, states of the game
 inGame = True
