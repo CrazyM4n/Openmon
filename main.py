@@ -2,7 +2,6 @@ import sys, pygame, char
 
 pygame.init()
 clock = pygame.time.Clock() #keeps fps steady
-mono = pygame.font.SysFont("monospace", 32)
 moveCur = 0
 moveMax = 2 #amount of frames between movement steps, pretty much the speed
 #animation indices
@@ -12,32 +11,45 @@ walkAnimationIndexMax = 80
 c = pygame.display.set_mode((800, 600))
 charPos = [0, 0] #x, y
 
+#controls
+interact = pygame.K_x
+
 #begin to define stuff needed for the game
 def bottomMessage(text):
+	mono = pygame.font.SysFont("monospace", 32)
+	pokeFont = pygame.font.Font("fonts/PokemonGB.ttf", 64)#http://www.fontspace.com/jackster-productions/pokemon-gb
 	box = pygame.image.load("img/box.png")
 	boxRect = box.get_rect()
 	boxRect.y = 400
 	c.blit(box, boxRect)
 	xIndex = 0
 	yIndex = 0
-	downArrow = mono.render("↓", 1, (0, 0, 0))
 	for byte in text:
 		pygame.time.delay(20)
-		screenLetter = mono.render(byte, 1, (0, 0, 0))
-		c.blit(screenLetter, ((xIndex*20)+20, (yIndex*40)+440))
+		screenLetter = pokeFont.render(byte, 1, (0, 0, 0))
+		c.blit(screenLetter, ((xIndex*30)+20, (yIndex*50)+430)) #with old font: c.blit(screenLetter, ((xIndex*20)+20, (yIndex*40)+420))
 		pygame.display.flip()
 		xIndex += 1
-		if xIndex >= 38: #amount of characters in a line
+		if xIndex >= 25: #amount of characters in a line old = 38
 			xIndex = 0
 			yIndex += 1
-		if yIndex >= 3:
+		if yIndex >= 2:
 			yIndex = 0
-			c.blit(downArrow, (740, 550))
+			next = False
+			downArrow = mono.render("↓ [Press X]", 1, (0, 0, 0)) #↓
+			c.blit(downArrow, (550, 550))
+			pygame.display.flip()
+			while next == False:
+				for event in pygame.event.get():
+					if event.type == pygame.QUIT: sys.exit()
+					if event.type == pygame.KEYDOWN:
+						if event.key == interact:
+							c.blit(box, boxRect)
+							next = True
 
-	pygame.time.delay(100000)
 
 def intro():
-	bottomMessage("Hello, I'm your new professor, Cutman. Today we will learn about why you shouldn't take too many showers. sfksgrjhgredjhgjhfgkjxdrgfgkgsfz")
+	bottomMessage("Hello, I am your new professor, Mrs. Conifer. It seems as if you have just arrived here into the world of Openmon. Openmon is an awesome world full of amazing adventures and many Openmon to find and catch! An Openmon is like a creature, that some people use to fight, but others keep them as pets. I see you want to fight Openmon. So, let me ask you, what is your name?")
 
 
 #game loop
@@ -154,3 +166,6 @@ while inGame:
 		inIntro = False
 
 	pygame.display.flip()
+
+
+#save game here, so it saves if you exit it normally in the game
