@@ -1,4 +1,4 @@
-import sys, pygame, char
+import sys, pygame, char, intros
 
 pygame.init()
 clock = pygame.time.Clock() #keeps fps steady
@@ -17,6 +17,7 @@ interact = pygame.K_x
 #begin to define stuff needed for the game
 def bottomMessage(text):
 	mono = pygame.font.SysFont("monospace", 32)
+	downArrow = mono.render("↓ [Press X]", 1, (0, 0, 0)) #↓
 	pokeFont = pygame.font.Font("fonts/PokemonGB.ttf", 64)#http://www.fontspace.com/jackster-productions/pokemon-gb
 	box = pygame.image.load("img/box.png")
 	boxRect = box.get_rect()
@@ -36,7 +37,6 @@ def bottomMessage(text):
 		if yIndex >= 2:
 			yIndex = 0
 			next = False
-			downArrow = mono.render("↓ [Press X]", 1, (0, 0, 0)) #↓
 			c.blit(downArrow, (550, 550))
 			pygame.display.flip()
 			while next == False:
@@ -46,15 +46,21 @@ def bottomMessage(text):
 						if event.key == interact:
 							c.blit(box, boxRect)
 							next = True
+	next = False 
+	while next == False:
+				for event in pygame.event.get():
+					if event.type == pygame.QUIT: sys.exit()
+					if event.type == pygame.KEYDOWN:
+						if event.key == interact:
+							next = True
 
 
 def intro():
-	bottomMessage("Hello, I am your new professor, Mrs. Conifer. It seems as if you have just arrived here into the world of Openmon. Openmon is an awesome world full of amazing adventures and many Openmon to find and catch! An Openmon is like a creature, that some people use to fight, but others keep them as pets. I see you want to fight Openmon. So, let me ask you, what is your name?")
-
+	bottomMessage(intros.introString[0])
 
 #game loop
 inGame = True #states of the game
-inIntro = True
+inIntro = False
 showChar = True
 canMove = True
 
@@ -65,12 +71,22 @@ down = False
 left = False
 right = False
 male = True
-female = False
+
+if male == True:
+	charUp = char.maleCharUp
+	charDown = char.maleCharDown
+	charLeft = char.maleCharLeft
+	charRight = char.maleCharRight
+else: 
+	charUp = char.femaleCharUp
+	charDown = char.femaleCharDown
+	charLeft = char.femaleCharLeft
+	charRight = char.femaleCharRight
 
 while inGame:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT: inGame = False #sys.exit() exit game
-		if event.type == pygame.KEYUP: walking = False
+		if event.type == pygame.KEYUP: walking = False #to check when to use idle animation
 
 	clock.tick(240)
 	c.fill((0, 0, 0)) #clears screen after every frame
@@ -91,9 +107,9 @@ while inGame:
 				char.charRect.x = charPos[0]
 				char.charRect.y = charPos[1]
 				if walkAnimationIndex >= walkAnimationIndexMax/2: #animates the walking animation
-					c.blit(char.maleCharUp[1], char.charRect)
+					c.blit(charUp[1], char.charRect)
 				else:
-					c.blit(char.maleCharUp[2], char.charRect)
+					c.blit(charUp[2], char.charRect)
 				walkAnimationIndex += 1
 
 		elif keys[pygame.K_DOWN]:
@@ -109,9 +125,9 @@ while inGame:
 				char.charRect.x = charPos[0]
 				char.charRect.y = charPos[1]
 				if walkAnimationIndex >= walkAnimationIndexMax/2:
-					c.blit(char.maleCharDown[1], char.charRect)
+					c.blit(charDown[1], char.charRect)
 				else:
-					c.blit(char.maleCharDown[2], char.charRect)
+					c.blit(charDown[2], char.charRect)
 				walkAnimationIndex += 1
 
 		elif keys[pygame.K_LEFT]:
@@ -127,9 +143,9 @@ while inGame:
 				char.charRect.x = charPos[0]
 				char.charRect.y = charPos[1]
 				if walkAnimationIndex >= walkAnimationIndexMax/2:
-					c.blit(char.maleCharLeft[1], char.charRect)
+					c.blit(charLeft[1], char.charRect)
 				else:
-					c.blit(char.maleCharLeft[2], char.charRect)
+					c.blit(charLeft[2], char.charRect)
 				walkAnimationIndex += 1
 
 		elif keys[pygame.K_RIGHT]:
@@ -145,16 +161,20 @@ while inGame:
 				char.charRect.x = charPos[0]
 				char.charRect.y = charPos[1]
 				if walkAnimationIndex >= walkAnimationIndexMax/2:
-					c.blit(char.maleCharRight[1], char.charRect)
+					c.blit(charRight[1], char.charRect)
 				else:
-					c.blit(char.maleCharRight[2], char.charRect)
+					c.blit(charRight[2], char.charRect)
 				walkAnimationIndex += 1
 
 		if walking == False and showChar == True:
 			if up:
-				c.blit(char.maleCharUp[0], char.charRect)
+				c.blit(charUp[0], char.charRect)
 			if down:
-				c.blit(char.maleCharDown[0], char.charRect)
+				c.blit(charDown[0], char.charRect)
+			if left:
+				c.blit(charLeft[0], char.charRect)
+			if right:
+				c.blit(charRight[0], char.charRect)
 
 		if walkAnimationIndex >= walkAnimationIndexMax:
 			walkAnimationIndex = 0
