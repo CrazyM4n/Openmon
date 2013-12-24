@@ -3,7 +3,7 @@ import sys, pygame, char, intros, parse_key_codes, maps
 pygame.init()
 clock = pygame.time.Clock() #keeps fps steady
 moveCur = 0
-moveMax = 2 #amount of frames between movement steps, pretty much the speed
+moveMax = 1 #amount of frames between movement steps, pretty much the speed
 #animation indices
 walkAnimationIndex = 0
 walkAnimationIndexMax = 80
@@ -22,11 +22,11 @@ interact = pygame.K_x
 
 #player constants
 name = ""
-male = None
+male = True
 
 #begin to define stuff needed for the game
 def boyOrGirl():
-    if male: return "boy"
+    if male == True: return "boy"
     if male == False: return "girl"
 
 def bottomMessage(text):
@@ -189,14 +189,15 @@ def intro():
                     if event.type == pygame.QUIT: sys.exit()
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_x:
-                            if boySelected: enter = True; c.fill((0, 0, 0)); return True;
-                            elif boySelected == False: enter = True; c.fill((0, 0, 0)); return False; 
+                            if boySelected: enter = True; c.fill((0, 0, 0)); return True; print("male");
+                            elif boySelected == False: enter = True; c.fill((0, 0, 0)); return False; print("female"); 
 
                         elif event.key == pygame.K_LEFT or pygame.K_RIGHT:
                             boySelected = not boySelected
 
-    global male                        
+    global male
     male = askForGender()
+    print("up "+boyOrGirl())
 
     #finally done asking stuff ;_;
     bottomMessage(intros.introString[5]+boyOrGirl()+intros.introString[6]+name+intros.introString[7]+"") #hold on i'll be back
@@ -321,7 +322,7 @@ def moveChar():
                 
 #game loop, states of the game
 inGame = True
-inIntro = False
+inIntro = True
 showChar = True
 canMove = True
 drawMap = True
@@ -333,16 +334,6 @@ down = False
 left = False
 right = False
 
-if male == True:
-    charUp = char.maleCharUp
-    charDown = char.maleCharDown
-    charLeft = char.maleCharLeft
-    charRight = char.maleCharRight
-else: 
-    charUp = char.femaleCharUp
-    charDown = char.femaleCharDown
-    charLeft = char.femaleCharLeft
-    charRight = char.femaleCharRight
 
 while inGame:
 
@@ -358,6 +349,16 @@ while inGame:
         showChar = False
         drawMap = False
         intro()
+        if male == True: #set the genders
+            charUp = char.maleCharUp
+            charDown = char.maleCharDown
+            charLeft = char.maleCharLeft
+            charRight = char.maleCharRight
+        if male == False: 
+            charUp = char.femaleCharUp
+            charDown = char.femaleCharDown
+            charLeft = char.femaleCharLeft
+            charRight = char.femaleCharRight
         inIntro = False
         canMove = True
         showChar = True
