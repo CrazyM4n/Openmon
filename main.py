@@ -1,6 +1,8 @@
 import sys, pygame, char, intros, parse_key_codes, maps
 
 pygame.init()
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
 clock = pygame.time.Clock() #keeps fps steady
 moveCur = 0
 moveMax = 1 #amount of frames between movement steps, pretty much the speed
@@ -8,8 +10,11 @@ moveMax = 1 #amount of frames between movement steps, pretty much the speed
 walkAnimationIndex = 0
 walkAnimationIndexMax = 80
 
-c = pygame.display.set_mode((800, 600))
+c = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+
+#character stuff
 charPos = [0, 0] #x, y
+currentMap = "spawn"
 
 #fonts
 pokeFont = pygame.font.Font("fonts/PokemonGB.ttf", 64)#http://www.fontspace.com/jackster-productions/pokemon-gb
@@ -204,27 +209,30 @@ def intro():
     bottomMessage(intros.introString[8])
 
 def parseMap(mapIndex):
-    tileRect = pygame.Rect(0, 0, 32, 32)
 
     for x in range(len(maps.mapData[mapIndex])):
-        for y in range(len(maps.mapData[mapIndex][x])):
-            tileRect.x = x*32
-            tileRect.y = y*32
-
+        for y in range(len(maps.mapData[mapIndex][x])):    
             floor, tile = maps.mapData[mapIndex][x][y]
 
             #draw floor
-            #if floor == 0: c.blit(maps.grass, tileRect)
             if floor == "": 
-                c.fill((0, 0, 0), tileRect)
+                floorRect = pygame.Rect(0, 0, 32, 32)
+                floorRect.x = x*32
+                floorRect.y = y*32
+                c.fill((0, 0, 0), floorRect)
             else:
-                c.blit(maps.floors[floor], tileRect)
+                floorRect = maps.floors[floor].get_rect()
+                floorRect.x = x*32
+                floorRect.y = y*32
+                c.blit(maps.floors[floor], floorRect)
 
             #draw tiles
-            #if tile == 1: c.blit(maps.tallGrass, tileRect)
             if tile == "": 
                 pass
             else:
+                tileRect = maps.tiles[tile].get_rect()
+                tileRect.x = x*32
+                tileRect.y = y*32
                 c.blit(maps.tiles[tile], tileRect)
 
 def moveChar():
@@ -232,6 +240,18 @@ def moveChar():
         global moveCur, walking, up, down, left, right, walkAnimationIndex
         moveCur -= 1
         keys = pygame.key.get_pressed() #thanks to http://stackoverflow.com/questions/16044229/how-to-get-keyboard-input-in-pygame
+
+        print("checking "+str(charPos[0])+" in 0 to "+str(WINDOW_WIDTH)+" and "+str(charPos[1])+" in 0 to "+str(WINDOW_HEIGHT))
+
+        if charPos[1] >= WINDOW_HEIGHT - char.charRect.height: #check wall boundaries, will work on this later. itll be cool trust me pls you will be able to transition maps TODO
+            charPos[1] -= 1
+        elif charPos[1] <= 0:
+            charPos[1] += 1
+
+        if charPos[0] >= WINDOW_WIDTH - char.charRect.width:
+            charPos[0] -= 1
+        elif charPos[0] <= 0:
+            charPos[0] += 1
 
         if keys[pygame.K_UP]:
             if moveCur <= 0:
@@ -321,8 +341,9 @@ def moveChar():
 
                 
 #game loop, states of the game
+inIntro = False #important for debugging
+
 inGame = True
-inIntro = True
 showChar = True
 canMove = True
 drawMap = True
@@ -334,6 +355,8 @@ down = False
 left = False
 right = False
 
+#other random stuff
+justSpawned = True
 
 while inGame:
 
@@ -344,29 +367,35 @@ while inGame:
         if event.type == pygame.KEYUP: walking = False #to check when to use idle animation
 
     if inIntro:
-        inIntro = True
         canMove = False
         showChar = False
         drawMap = False
         intro()
-        if male == True: #set the genders
-            charUp = char.maleCharUp
-            charDown = char.maleCharDown
-            charLeft = char.maleCharLeft
-            charRight = char.maleCharRight
-        if male == False: 
-            charUp = char.femaleCharUp
-            charDown = char.femaleCharDown
-            charLeft = char.femaleCharLeft
-            charRight = char.femaleCharRight
         inIntro = False
         canMove = True
         showChar = True
         drawMap = True
+        justSpawned = True
 
     if drawMap:
         c.fill((0, 0, 0)) #clears screen after every frame
-        parseMap(maps.mapIndex["spawn"])
+
+        #change the spawning point for all maps that need it
+        if justSpawned and currentMap == "spawn":
+            charPos = [400, 400]
+            if male == True: #set the genders
+                charUp = char.maleCharUp
+                charDown = char.maleCharDown
+                charLeft = char.maleCharLeft
+                charRight = char.maleCharRight
+            if male == False: 
+                charUp = char.femaleCharUp
+                charDown = char.femaleCharDown
+                charLeft = char.femaleCharLeft
+                charRight = char.femaleCharRight
+            justSpawned = False
+
+        parseMap(maps.mapIndex[currentMap])
         moveChar()
 
     pygame.display.flip()

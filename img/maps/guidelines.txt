@@ -1,0 +1,5 @@
+Guidelines to making OpenMon sprites:
+-One tile is considered 16x16, which is scaled up to 32x32 when it is drawn onto the screen
+-Make sprites divisible by 8 at the least, but keep note that you can't move sprites within a tile
+
+Sorry if this doesn't make sense I'll rewrite it soon.
