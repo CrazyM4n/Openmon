@@ -32,6 +32,7 @@ aToZ = [
 pygame.K_a,
 pygame.K_b,
 pygame.K_c,
+pygame.K_d,
 pygame.K_e,
 pygame.K_f,
 pygame.K_g,

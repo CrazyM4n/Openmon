@@ -6,6 +6,6 @@ introString = [
 "Now that we have that, what is your gender?",
 "So let me get this straight, you are a ",
 " named ",
-"? "
+"? ",
 "Okay, great! Let's get you started! Here we have three Openballs. Each of them contains an Openmon. Which one would you like to choose?"
 ]
