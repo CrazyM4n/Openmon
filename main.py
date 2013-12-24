@@ -202,13 +202,12 @@ def intro():
 
     global male
     male = askForGender()
-    print("up "+boyOrGirl())
 
     #finally done asking stuff ;_;
     bottomMessage(intros.introString[5]+boyOrGirl()+intros.introString[6]+name+intros.introString[7]+"") #hold on i'll be back
     bottomMessage(intros.introString[8])
 
-def parseMap(mapIndex):
+def parseMap(mapIndex): #fix custom size tiles tomorrow TODO
 
     for x in range(len(maps.mapData[mapIndex])):
         for y in range(len(maps.mapData[mapIndex][x])):    
