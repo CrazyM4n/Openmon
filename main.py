@@ -212,7 +212,6 @@ def parseMap(mapIndex): #fix custom size tiles tomorrow TODO
     for x in range(len(maps.mapData[mapIndex])):
         for y in range(len(maps.mapData[mapIndex][x])):    
             floor, tile = maps.mapData[mapIndex][x][y]
-
             #draw floor
             if floor == "": 
                 floorRect = pygame.Rect(0, 0, 32, 32)
@@ -225,6 +224,9 @@ def parseMap(mapIndex): #fix custom size tiles tomorrow TODO
                 floorRect.y = y*32
                 c.blit(maps.floors[floor], floorRect)
 
+    for x in range(len(maps.mapData[mapIndex])):
+        for y in range(len(maps.mapData[mapIndex][x])):    
+            floor, tile = maps.mapData[mapIndex][x][y]
             #draw tiles
             if tile == "": 
                 pass
@@ -235,107 +237,143 @@ def parseMap(mapIndex): #fix custom size tiles tomorrow TODO
                 c.blit(maps.tiles[tile], tileRect)
 
 def moveChar():
-    if canMove:
-        global moveCur, walking, up, down, left, right, walkAnimationIndex
-        moveCur -= 1
-        keys = pygame.key.get_pressed() #thanks to http://stackoverflow.com/questions/16044229/how-to-get-keyboard-input-in-pygame
+    global moveCur, walking, up, down, left, right, walkAnimationIndex
+    moveCur -= 1
+    keys = pygame.key.get_pressed() #thanks to http://stackoverflow.com/questions/16044229/how-to-get-keyboard-input-in-pygame
 
-        print("checking "+str(charPos[0])+" in 0 to "+str(WINDOW_WIDTH)+" and "+str(charPos[1])+" in 0 to "+str(WINDOW_HEIGHT))
+    if charPos[1] >= WINDOW_HEIGHT - char.charRect.height: #check wall boundaries, will work on this later. itll be cool trust me pls you will be able to transition maps TODO
+        charPos[1] -= 1
+    elif charPos[1] <= 0:
+        charPos[1] += 1
 
-        if charPos[1] >= WINDOW_HEIGHT - char.charRect.height: #check wall boundaries, will work on this later. itll be cool trust me pls you will be able to transition maps TODO
-            charPos[1] -= 1
-        elif charPos[1] <= 0:
-            charPos[1] += 1
+    if charPos[0] >= WINDOW_WIDTH - char.charRect.width:
+        charPos[0] -= 1
+    elif charPos[0] <= 0:
+        charPos[0] += 1
 
-        if charPos[0] >= WINDOW_WIDTH - char.charRect.width:
-            charPos[0] -= 1
-        elif charPos[0] <= 0:
-            charPos[0] += 1
+    canMoveUp = canMoveDown = canMoveRight = canMoveLeft = True
 
-        if keys[pygame.K_UP]:
+    for x in range(len(maps.mapCollisions[maps.mapIndex[currentMap]])):
+        for y in range(len(maps.mapCollisions[maps.mapIndex[currentMap]][x])):
+            if maps.mapCollisions[maps.mapIndex[currentMap]][x][y] == 1:
+                tempCollisionRect = pygame.Rect(0, 0, 32, 32)
+                tempCollisionRect.x = x*32 
+                tempCollisionRect.y = y*32
+                print("checking "+ str(char.charRect.center) + " against " + str(tempCollisionRect.center))
+            elif maps.mapCollisions[maps.mapIndex[currentMap]][x][y] == 0:
+                tempCollisionRect = pygame.Rect(0, 0, 0, 0)
+            if char.charRect.colliderect(tempCollisionRect):
+                if up: canMoveUp = False    #woo collision detection!
+                if down: canMoveDown = False
+                if left: canMoveLeft = False
+                if right: canMoveRight = False
+            else: #just for readability's sake
+                pass
+
+    #check if rectangles collide on the x axis
+
+    if keys[pygame.K_UP]:
+        if canMoveUp:
             if moveCur <= 0:
                 moveCur = moveMax
                 charPos[1] += char.move("up", 1)
-            if showChar:
-                walking = True
-                up = True
-                down = False
-                left = False
-                right = False
-                char.charRect.x = charPos[0]
-                char.charRect.y = charPos[1]
-                if walkAnimationIndex >= walkAnimationIndexMax/2: #animates the walking animation
-                    c.blit(charUp[1], char.charRect)
-                else:
-                    c.blit(charUp[2], char.charRect)
-                walkAnimationIndex += 1
+            walking = True
+            up = True
+            down = False
+            left = False
+            right = False
+            #char.charRect.x = charPos[0]
+            #char.charRect.y = charPos[1]
+            if walkAnimationIndex >= walkAnimationIndexMax/2: #animates the walking animation
+                c.blit(charUp[1], char.charRect)
+            else:
+                c.blit(charUp[2], char.charRect)
+            walkAnimationIndex += 1
+            canMoveDown = True
+        else:
+            charPos[1] += char.move("down", 1)
+            walking = False
 
-        elif keys[pygame.K_DOWN]:
+    elif keys[pygame.K_DOWN]:
+        if canMoveDown:
             if moveCur <= 0:
                 moveCur = moveMax
                 charPos[1] += char.move("down", 1)
-            if showChar:
-                walking = True
-                up = False
-                down = True
-                left = False
-                right = False
-                char.charRect.x = charPos[0]
-                char.charRect.y = charPos[1]
-                if walkAnimationIndex >= walkAnimationIndexMax/2:
-                    c.blit(charDown[1], char.charRect)
-                else:
-                    c.blit(charDown[2], char.charRect)
-                walkAnimationIndex += 1
+            walking = True
+            up = False
+            down = True
+            left = False
+            right = False
+            #char.charRect.x = charPos[0]
+            #char.charRect.y = charPos[1]
+            if walkAnimationIndex >= walkAnimationIndexMax/2:
+                c.blit(charDown[1], char.charRect)
+            else:
+                c.blit(charDown[2], char.charRect)
+            walkAnimationIndex += 1
+            canMoveUp = True
+        else:
+            charPos[1] += char.move("up", 1)
+            walking = False
 
-        elif keys[pygame.K_LEFT]:
+    elif keys[pygame.K_LEFT]:
+        if canMoveLeft:
             if moveCur <= 0:
                 moveCur = moveMax
                 charPos[0] += char.move("left", 1)
-            if showChar:
-                walking = True
-                up = False
-                down = False
-                left = True
-                right = False
-                char.charRect.x = charPos[0]
-                char.charRect.y = charPos[1]
-                if walkAnimationIndex >= walkAnimationIndexMax/2:
-                    c.blit(charLeft[1], char.charRect)
-                else:
-                    c.blit(charLeft[2], char.charRect)
-                walkAnimationIndex += 1
+            walking = True
+            up = False
+            down = False
+            left = True
+            right = False
+            #char.charRect.x = charPos[0]
+            #char.charRect.y = charPos[1]
+            if walkAnimationIndex >= walkAnimationIndexMax/2:
+                c.blit(charLeft[1], char.charRect)
+            else:
+                c.blit(charLeft[2], char.charRect)
+            walkAnimationIndex += 1
+            canMoveRight = True
+        else:
+            charPos[0] += char.move("right", 1)
+            walking = False
 
-        elif keys[pygame.K_RIGHT]:
+    elif keys[pygame.K_RIGHT]:
+        if canMoveRight:
             if moveCur <= 0:
                 moveCur = moveMax
                 charPos[0] += char.move("right", 1)
-            if showChar:
-                walking = True
-                up = False
-                down = False
-                left = False
-                right = True
-                char.charRect.x = charPos[0]
-                char.charRect.y = charPos[1]
-                if walkAnimationIndex >= walkAnimationIndexMax/2:
-                    c.blit(charRight[1], char.charRect)
-                else:
-                    c.blit(charRight[2], char.charRect)
-                walkAnimationIndex += 1
+            walking = True
+            up = False
+            down = False
+            left = False
+            right = True
+            #char.charRect.x = charPos[0]
+            #char.charRect.y = charPos[1]
+            if walkAnimationIndex >= walkAnimationIndexMax/2:
+                c.blit(charRight[1], char.charRect)
+            else:
+                c.blit(charRight[2], char.charRect)
+            walkAnimationIndex += 1
+            canMoveLeft = True
+        else:
+            charPos[0] += char.move("left", 1)
+            walking = False
 
-        if walking == False and showChar == True:
-            if up:
-                c.blit(charUp[0], char.charRect)
-            elif down:
-                c.blit(charDown[0], char.charRect)
-            elif left:
-                c.blit(charLeft[0], char.charRect)
-            elif right:
-                c.blit(charRight[0], char.charRect)
+    if walking == False:
+        if up:
+            c.blit(charUp[0], char.charRect)
+        elif down:
+            c.blit(charDown[0], char.charRect)
+        elif left:
+            c.blit(charLeft[0], char.charRect)
+        elif right:
+            c.blit(charRight[0], char.charRect)
 
-        if walkAnimationIndex >= walkAnimationIndexMax:
-            walkAnimationIndex = 0
+    if walkAnimationIndex >= walkAnimationIndexMax:
+        walkAnimationIndex = 0
+
+    #check for events here
 
 
                 
@@ -343,8 +381,6 @@ def moveChar():
 inIntro = False #important for debugging
 
 inGame = True
-showChar = True
-canMove = True
 drawMap = True
 
 #stuff for animations
@@ -366,13 +402,9 @@ while inGame:
         if event.type == pygame.KEYUP: walking = False #to check when to use idle animation
 
     if inIntro:
-        canMove = False
-        showChar = False
         drawMap = False
         intro()
         inIntro = False
-        canMove = True
-        showChar = True
         drawMap = True
         justSpawned = True
 

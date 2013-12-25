@@ -12,14 +12,16 @@ femaleCharRight = [pygame.transform.scale2x(pygame.image.load("img/char/walk/f/w
 charRect = maleCharDown[0].get_rect()
 
 def move(direction, amnt):
-	x = charRect.x
-	y = charRect.y
-
+	
 	if direction == "up":
+		charRect.y += -1
 		return -1
 	elif direction == "down":
+		charRect.y += 1
 		return 1
 	elif direction == "left":
+		charRect.x += -1
 		return -1
 	elif direction == "right":
+		charRect.x += 1
 		return 1

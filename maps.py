@@ -31,6 +31,11 @@ for x in range(len(mapData[mapIndex["spawn"]])): #make it all floor in the spawn
 		if y in range(3, 15) and x in range(5, 20):
 			mapData[mapIndex["spawn"]][x][y] = ("openMonCenterFloor", "")
 
-mapData[mapIndex["spawn"]][10][10] = ("openMonCenterFloor", "openMonCenterWall")
+mapData[mapIndex["spawn"]][5][2] = ("", "openMonCenterWall")
+
+for x in range(len(mapCollisions[mapIndex["spawn"]])): #make the wall collide
+	for y in range(len(mapCollisions[mapIndex["spawn"]][x])):
+		if y == 1 and x in range(5, 20):
+			mapCollisions[mapIndex["spawn"]][x][y] = 1
 
 #mapData[mapIndex["spawn"]][5][5] = ("grass", "tallGrass") example to set a tile on a map
